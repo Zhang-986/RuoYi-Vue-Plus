@@ -199,7 +199,6 @@ public class SysLoginService {
             recordLogininfor(tenantId, username, loginFail, MessageUtils.message(loginType.getRetryLimitExceed(), maxRetryCount, lockTime));
             throw new UserException(loginType.getRetryLimitExceed(), maxRetryCount, lockTime);
         }
-
         if (supplier.get()) {
             // 错误次数递增
             errorNumber++;
@@ -214,7 +213,6 @@ public class SysLoginService {
                 throw new UserException(loginType.getRetryLimitCount(), errorNumber);
             }
         }
-
         // 登录成功 清空错误次数
         RedisUtils.deleteObject(errorKey);
     }

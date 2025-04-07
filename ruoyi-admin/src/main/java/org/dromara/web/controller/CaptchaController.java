@@ -51,6 +51,7 @@ public class CaptchaController {
     private final CaptchaProperties captchaProperties;
     private final MailProperties mailProperties;
 
+
     /**
      * 短信验证码
      *
@@ -126,17 +127,20 @@ public class CaptchaController {
      */
     @RateLimiter(time = 60, count = 10, limitType = LimitType.IP)
     public CaptchaVo getCodeImpl() {
-        // 保存验证码信息
+        // 生成唯一标识保存验证码信息
         String uuid = IdUtil.simpleUUID();
         String verifyKey = GlobalConstants.CAPTCHA_CODE_KEY + uuid;
-        // 生成验证码
+        // 动态创建验证码  生成验证码
         CaptchaType captchaType = captchaProperties.getType();
         boolean isMath = CaptchaType.MATH == captchaType;
+        // 策略模式选择数字生成器还是字符生成器
         Integer length = isMath ? captchaProperties.getNumberLength() : captchaProperties.getCharLength();
         CodeGenerator codeGenerator = ReflectUtils.newInstance(captchaType.getClazz(), length);
+
         AbstractCaptcha captcha = SpringUtils.getBean(captchaProperties.getCategory().getClazz());
         captcha.setGenerator(codeGenerator);
         captcha.createCode();
+
         // 如果是数学验证码，使用SpEL表达式处理验证码结果
         String code = captcha.getCode();
         if (isMath) {
@@ -144,7 +148,9 @@ public class CaptchaController {
             Expression exp = parser.parseExpression(StringUtils.remove(code, "="));
             code = exp.getValue(String.class);
         }
+        // 存储redis处理
         RedisUtils.setCacheObject(verifyKey, code, Duration.ofMinutes(Constants.CAPTCHA_EXPIRATION));
+        // 返回值
         CaptchaVo captchaVo = new CaptchaVo();
         captchaVo.setUuid(uuid);
         captchaVo.setImg(captcha.getImageBase64());

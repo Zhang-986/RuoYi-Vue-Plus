@@ -62,7 +62,11 @@ public class PasswordAuthStrategy implements IAuthStrategy {
         if (captchaEnabled) {
             validateCaptcha(tenantId, username, code, uuid);
         }
-        LoginUser loginUser = TenantHelper.dynamic(tenantId, () -> {
+        // 加载用户并校验密码
+        LoginUser loginUser = TenantHelper.dynamic(
+            tenantId,
+            () ->
+            {
             SysUserVo user = loadUserByUsername(username);
             loginService.checkLogin(LoginType.PASSWORD, tenantId, username, () -> !BCrypt.checkpw(password, user.getPassword()));
             // 此处可根据登录用户的数据不同 自行创建 loginUser
@@ -70,6 +74,7 @@ public class PasswordAuthStrategy implements IAuthStrategy {
         });
         loginUser.setClientKey(client.getClientKey());
         loginUser.setDeviceType(client.getDeviceType());
+        // 采用sa-token进行处理
         SaLoginModel model = new SaLoginModel();
         model.setDevice(client.getDeviceType());
         // 自定义分配 不同用户体系 不同 token 授权时间 不设置默认走全局 yml 配置
