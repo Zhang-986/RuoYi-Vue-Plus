@@ -43,10 +43,12 @@ public class RedisConfig {
     @Bean
     public RedissonAutoConfigurationCustomizer redissonCustomizer() {
         return config -> {
+            // 1. 注册 JavaTimeModule 处理 LocalDateTime
             JavaTimeModule javaTimeModule = new JavaTimeModule();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
             javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
+            // 2. 配置 ObjectMapper
             ObjectMapper om = new ObjectMapper();
             om.registerModule(javaTimeModule);
             om.setTimeZone(TimeZone.getDefault());

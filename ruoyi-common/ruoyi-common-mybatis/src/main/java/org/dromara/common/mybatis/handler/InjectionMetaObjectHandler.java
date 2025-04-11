@@ -35,7 +35,6 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
                 Date current = ObjectUtils.notNull(baseEntity.getCreateTime(), new Date());
                 baseEntity.setCreateTime(current);
                 baseEntity.setUpdateTime(current);
-
                 // 如果创建人为空，则填充当前登录用户的信息
                 if (ObjectUtil.isNull(baseEntity.getCreateBy())) {
                     LoginUser loginUser = getLoginUser();

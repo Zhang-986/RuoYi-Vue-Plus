@@ -61,6 +61,7 @@ public final class SpringUtils extends SpringUtil {
     }
 
     public static boolean isVirtual() {
+
         return Threading.VIRTUAL.isActive(getBean(Environment.class));
     }
 

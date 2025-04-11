@@ -32,8 +32,13 @@ public class ThreadPoolConfig {
      */
     private final int core = Runtime.getRuntime().availableProcessors() + 1;
 
+    // 定时任务线程池
     private ScheduledExecutorService scheduledExecutorService;
 
+    /**
+     *
+     * 适合IO密集型任务，如被阻塞的线程会释放CPU资源，不会导致线程阻塞。
+     */
     @Bean(name = "threadPoolTaskExecutor")
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")
     public ThreadPoolTaskExecutor threadPoolTaskExecutor(ThreadPoolProperties threadPoolProperties) {
@@ -42,6 +47,7 @@ public class ThreadPoolConfig {
         executor.setMaxPoolSize(core * 2);
         executor.setQueueCapacity(threadPoolProperties.getQueueCapacity());
         executor.setKeepAliveSeconds(threadPoolProperties.getKeepAliveSeconds());
+        // 采用CallerRunsPolicy可以避免因队列满而阻塞的线程，直接在调用线程中执行任务，避免阻塞。
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         return executor;
     }
@@ -51,14 +57,15 @@ public class ThreadPoolConfig {
      */
     @Bean(name = "scheduledExecutorService")
     protected ScheduledExecutorService scheduledExecutorService() {
-        // daemon 必须为 true
+        // BasicThreadFactory 比正常的ThreadFactory，可以自定义线程池名称，线程池名称会显示在堆栈跟踪中，便于调试
         BasicThreadFactory.Builder builder = new BasicThreadFactory.Builder().daemon(true);
         if (SpringUtils.isVirtual()) {
             builder.namingPattern("virtual-schedule-pool-%d").wrappedFactory(new VirtualThreadTaskExecutor().getVirtualThreadFactory());
         } else {
             builder.namingPattern("schedule-pool-%d");
         }
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(core,
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(
+            core,
             builder.build(),
             new ThreadPoolExecutor.CallerRunsPolicy()) {
             @Override
@@ -73,6 +80,7 @@ public class ThreadPoolConfig {
 
     /**
      * 销毁事件
+     *
      */
     @PreDestroy
     public void destroy() {

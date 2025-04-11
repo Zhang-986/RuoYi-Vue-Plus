@@ -218,6 +218,7 @@ public class AuthController {
                 return R.ok(result);
             }
         } catch (NotLoginException ignored) {
+            return R.fail(result);
         }
 
         // 获取域名

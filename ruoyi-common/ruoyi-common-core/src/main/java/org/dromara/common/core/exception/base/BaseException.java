@@ -12,6 +12,7 @@ import java.io.Serial;
 /**
  * 基础异常
  *
+ *
  * @author ruoyi
  */
 @Data

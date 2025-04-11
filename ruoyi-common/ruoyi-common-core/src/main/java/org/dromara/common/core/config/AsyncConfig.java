@@ -23,6 +23,8 @@ public class AsyncConfig implements AsyncConfigurer {
 
     /**
      * 自定义 @Async 注解使用系统线程池
+     *
+     * JDK21虚拟线程处理
      */
     @Override
     public Executor getAsyncExecutor() {
@@ -34,6 +36,7 @@ public class AsyncConfig implements AsyncConfigurer {
 
     /**
      * 异步执行异常处理
+     *
      */
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {

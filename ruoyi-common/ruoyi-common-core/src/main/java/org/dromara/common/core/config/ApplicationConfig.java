@@ -10,7 +10,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * @author Lion Li
  */
 @AutoConfiguration
+// 开启AOP注解功能
 @EnableAspectJAutoProxy
+// 开启异步注解功能,proxyTargetClass = true 表示使用CGLIB代理
 @EnableAsync(proxyTargetClass = true)
 public class ApplicationConfig {
 
